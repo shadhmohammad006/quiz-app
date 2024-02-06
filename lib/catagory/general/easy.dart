@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/provider/general_provider.dart';
+import 'package:flutter_application_2/score_page.dart';
+import 'package:provider/provider.dart';
 
 import 'question_model.dart';
-import '../../score_page.dart';
 
 class Easy extends StatefulWidget {
   const Easy({super.key});
@@ -11,8 +13,8 @@ class Easy extends StatefulWidget {
 }
 
 class _EasyState extends State<Easy> {
-  int index = 0;
   int mark = 0;
+  int index = 0;
 
   void answerQuestion(int indexOfAnswer) {
     if (questions[index].indexOfAnswer == indexOfAnswer) {
@@ -40,6 +42,7 @@ class _EasyState extends State<Easy> {
 
   @override
   Widget build(BuildContext context) {
+    print('easy');
     return Scaffold(
       //  backgroundColor: Color.fromARGB(255, 247, 247, 248),
       body: Column(

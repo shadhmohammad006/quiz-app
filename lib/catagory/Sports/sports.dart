@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../score_page.dart';
+import 'package:flutter_application_2/score_page.dart';
 import 's_question_model.dart';
 
 class sports extends StatefulWidget {

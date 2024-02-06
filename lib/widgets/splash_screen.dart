@@ -1,14 +1,17 @@
 import 'dart:async';
 
+
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/main.dart';
+
 import 'package:flutter_application_2/screen1.dart';
 
 import 'package:flutter_application_2/widgets/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 // Optional: For loading animation
-import '../color.dart';
+
 
 // ignore: must_be_immutable
 class SplashScreen extends StatefulWidget {
@@ -18,7 +21,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   void initState() {
-    checkUserLoggedIn();
+    checkGoogleLogOrNot();
+   // checkUserLoggedIn();
     super.initState();
   }
 
@@ -33,19 +37,15 @@ class _SplashScreenState extends State<SplashScreen> {
     });
 
     return Scaffold(
-      backgroundColor: first,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              height: 300,
-            ),
             // Your logo or branding elements here
-            Container(
-                child: Image.asset(
-                    'asset/images/AGNS.gif')), // Example: Load an image
-            SizedBox(height: 200),
+
+            Image.asset(
+                'asset/images/output-onlinegiftools.gif'), // Example: Load an image
+            SizedBox(height: 82),
             Container(
                 // color: Colors.white,
                 height: 60,
@@ -65,15 +65,42 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Future<void> checkUserLoggedIn() async {
-    final _sharedprfs = await SharedPreferences.getInstance();
+  // Future<void> checkUserLoggedIn() async {
+  //   final _sharedprfs = await SharedPreferences.getInstance();
 
-    final _UserLoggedIn = _sharedprfs.getBool(SAVE_KEY_NAME);
-    if (_UserLoggedIn == null || _UserLoggedIn == false) {
-      LoginScreen();
+  //   final _UserLoggedIn = _sharedprfs.getBool(SAVE_KEY_NAME);
+  //   if (_UserLoggedIn == null || _UserLoggedIn == false) {
+  //     LoginScreen();
+  //   } else {
+  //     Navigator.of(context)
+  //         .pushReplacement(MaterialPageRoute(builder: (ctx) => Screen1()));
+  //   }
+  // }
+  //  Future <Void> checkGoogleLogin()async{
+
+  // }
+  Future<void> checkGoogleLogOrNot() async {
+    UserCredential? userCredential = await signInWithGoogle();
+    if (userCredential != true) {
+      // Successful sign-in
+      print("User signed in: ${userCredential.user!.displayName}");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Screen1(),
+        ),
+      );
     } else {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (ctx) => Screen1()));
+      // Sign-in failed msp
+      print("Failed to sign in with Google");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ),
+      );
     }
   }
+
+  
 }

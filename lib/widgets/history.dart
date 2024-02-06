@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/provider/general_provider.dart';
 import 'package:flutter_application_2/screen1.dart';
 import 'package:flutter_application_2/widgets/login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Result extends StatefulWidget {
@@ -10,30 +14,18 @@ class Result extends StatefulWidget {
 
 class _ResultState extends State<Result> {
   int mark = 0;
-  List<int> userScores = [];
-  List<String> storedTimes = [];
+  // List<int> userScores = [];
+  // List<String> storedTimes = [];
   List<String> datetimes = [];
   String? datetime;
+  GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    getUserScores();
-    loadStoredTimes();
-  }
-
-  Future<void> getUserScores() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userScoresString = prefs.getString('user_scores');
-    //await prefs.clear();
-    if (userScoresString != null) {
-      setState(() {
-        userScores = userScoresString
-            .split(',')
-            .map((s) => int.tryParse(s) ?? 0)
-            .toList();
-      });
-    }
+    Provider.of<GeneralProvider>(context, listen: false).getUserScores();
+    Provider.of<GeneralProvider>(context, listen: false).loadStoredTimes();
   }
 
   Future<void> clearSavedData() async {
@@ -41,14 +33,33 @@ class _ResultState extends State<Result> {
     await prefs.clear();
   }
 
-  Future<void> loadStoredTimes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedTimesList = prefs.getStringList('storedTimes');
-
-    setState(() {
-      storedTimes = storedTimesList ?? [];
-    });
+  Future<void> clearPerformance() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
+
+  // Future<void> getUserScores() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? userScoresString = prefs.getString('user_scores');
+  //   //await prefs.clear();
+  //   if (userScoresString != null) {
+  //     setState(() {
+  //       userScores = userScoresString
+  //           .split(',')
+  //           .map((s) => int.tryParse(s) ?? 0)
+  //           .toList();
+  //     });
+  //   }
+  // }
+
+  // Future<void> loadStoredTimes() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final storedTimesList = prefs.getStringList('storedTimes');
+
+  //   setState(() {
+  //     storedTimes = storedTimesList ?? [];
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -78,43 +89,14 @@ class _ResultState extends State<Result> {
                 logout(context);
               },
               icon: Icon(Icons.exit_to_app)),
-          PopupMenuButton<int>(
-            itemBuilder: (context) => [
-              // popupmenu item 1
-              PopupMenuItem(
-                value: 1,
-                // row has two child icon and text.
-                child: Row(
-                  children: [
-                    TextButton(
-                        onPressed: () {
-                          clearSavedData();
-                        },
-                        child: Icon(Icons.clear)),
-                    Text("clear history")
-                  ],
-                ),
-              ),
-              // popupmenu item 2
-              PopupMenuItem(
-                value: 2,
-                // row has two child icon and text
-                child: Row(
-                  children: [
-                    TextButton(
-                        onPressed: () {
-                          logout(context);
-                        },
-                        child: Icon(Icons.logout)),
-                    Text('Log out')
-                  ],
-                ),
-              ),
-            ],
-            offset: Offset(0, 100),
-            color: Colors.grey,
-            elevation: 2,
-          ),
+          TextButton(
+              onPressed: () {
+                clearPerformance();
+              },
+              child: Text(
+                'clear performance',
+                style: TextStyle(color: Colors.black),
+              ))
         ],
       ),
       body: Center(
@@ -122,29 +104,6 @@ class _ResultState extends State<Result> {
           children: [
             SizedBox(
               height: 30,
-            ),
-            Row(
-              children: [
-                // Container(
-                //     margin: EdgeInsets.only(left: 270),
-                //     height: 50,
-                //     width: 50,
-                //     decoration: BoxDecoration(
-                //         border: Border.all(), shape: BoxShape.circle),
-                //      child:
-                //     // PopupMenuItem(
-                //     //   child: Column(children: [
-                //     //     TextButton(onPressed: () {}, child: Text('Clear data'))
-                //     //   ]),
-                //     // )
-                //     // IconButton(
-                //     //   onPressed: () {
-                //     //     //
-                //     //   },
-                //     //   icon: Icon(Icons.),
-                //     // ),
-                //     )
-              ],
             ),
             SizedBox(
               height: 20,
@@ -200,7 +159,9 @@ class _ResultState extends State<Result> {
                 children: [
                   Expanded(
                     child: ListView.builder(
-                      itemCount: userScores.length,
+                      itemCount: Provider.of<GeneralProvider>(context)
+                          .userScores
+                          .length,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                           child: ListTile(
@@ -213,9 +174,10 @@ class _ResultState extends State<Result> {
                                         borderRadius:
                                             BorderRadius.circular(20)),
                                     child: Column(children: [
-                                      Text('${storedTimes[index]}'),
                                       Text(
-                                        'match: ${index + 1} \n score: ${userScores[index]}',
+                                          '${Provider.of<GeneralProvider>(context).storedTimes[index]}'),
+                                      Text(
+                                        'match: ${index + 1} \n score: ${Provider.of<GeneralProvider>(context).userScores[index]}',
                                         style: TextStyle(fontSize: 18),
                                       ),
                                     ]))
@@ -235,7 +197,11 @@ class _ResultState extends State<Result> {
     );
   }
 
-  void logout(BuildContext ctx) {
+  void logout(BuildContext ctx) async {
+    clearSavedData();
+    await _auth.signOut();
+    await _googleSignIn.signOut();
+    print('signed out');
     Navigator.of(ctx).pushAndRemoveUntil(
         MaterialPageRoute(builder: (ctx) => LoginScreen()), (route) => false);
   }

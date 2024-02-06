@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "117569829981",
+    "project_id": "quizapp-ef2a4",
+    "storage_bucket": "quizapp-ef2a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117569829981:android:e0ba9f5324f423890d61b4",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbqAD4JlvSwq-XTeyWLFoxmviaUHRBg7k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
